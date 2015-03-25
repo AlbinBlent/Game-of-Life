@@ -2,7 +2,15 @@
 
 var Cell = function () {
 	var isAlive = false;
-	var isAtEdgeOfBoard = false;
+	var amountOfLiveNeighbours = 0;
+
+	this.setAmountOfLiveNeighbours = function (amount) {
+		amountOfLiveNeighbours = amount;
+	};
+
+	this.getAmountOfLiveNeighbours = function () {
+		return amountOfLiveNeighbours;
+	};
 
 	this.spawn = function () {
 		isAlive = true;
@@ -15,62 +23,95 @@ var Cell = function () {
 	this.isAlive = function () {
 		return isAlive;
 	};
-
-	this.setAtEdgeOfBoard = function () {
-		isAtEdgeOfBoard = true;
-	};
-
-	this.checkIfAtEdgeOfBoard = function () {
-		return isAtEdgeOfBoard;
-	};
 };
 
-function returnAmountOfLiveNeighbours(gameBoard, x, y) {
-	var amountOfLiveNeighbours = 0;
-	
+function cellInRange (x,y,xSize,ySize) {
+    if (x < 0 || x > xSize-1 || y < 0 || y > ySize-1) {
+      return false;
+    } else {
+      return true;
+    }
+}
 
-		if(gameBoard[x-1][y-1].isAlive()) {
-        amountOfLiveNeighbours++;
-    	}
-    	if(gameBoard[x-1][y].isAlive()) {
-   		amountOfLiveNeighbours++;
+function returnAmountOfLiveNeighbours(universe, x, y) {
+	var xSize = universe.xSize();
+    var ySize = universe.ySize();
+    var amountOfLiveNeighbours = 0;
+        
+	if(cellInRange(x-1,y-1,xSize,ySize)) {
+       	if(universe.returnCell(x-1,y-1).isAlive()) {
+       		amountOfLiveNeighbours++;
+       	}
+    }  
+        
+    if(cellInRange(x-1,y,xSize,ySize)) {
+       	if(universe.returnCell(x-1,y).isAlive()) {
+       		amountOfLiveNeighbours++;
+       	}
+    }
+
+    if(cellInRange(x-1,y+1,xSize,ySize)) { 
+		if(universe.returnCell(x-1,y+1).isAlive()) {
+       		amountOfLiveNeighbours++;
+      	}
+    }
+
+    if(cellInRange(x+1,y-1,xSize,ySize)) { 
+      	if(universe.returnCell(x+1,y-1).isAlive()) {
+       		amountOfLiveNeighbours++;
+       	}
+    }
+
+    if(cellInRange(x+1,y,xSize,ySize)) { 
+      	if(universe.returnCell(x+1,y).isAlive()) {
+       		amountOfLiveNeighbours++;
+       	}
+	}
+        
+    if(cellInRange(x+1,y+1,xSize,ySize)) {
+       	if(universe.returnCell(x+1,y+1).isAlive()) {
+       		amountOfLiveNeighbours++;
+       	}
+    }
+
+    if(cellInRange(x,y+1,xSize,ySize)) { 
+        if(universe.returnCell(x,y+1).isAlive()) {
+        	amountOfLiveNeighbours++;
         }
-        if(gameBoard[x-1][y+1].isAlive()) {
-          amountOfLiveNeighbours++;
+	}
+    
+    if(cellInRange(x,y-1,xSize,ySize)) { 
+        if(universe.returnCell(x,y-1).isAlive()) {
+          	amountOfLiveNeighbours++;
         }
-        if(gameBoard[x+1][y-1].isAlive()) {
-          amountOfLiveNeighbours++;
-        }
-        if(gameBoard[x+1][y].isAlive()) {
-          amountOfLiveNeighbours++;
-        }
-        if(gameBoard[x+1][y+1].isAlive()) {
-          amountOfLiveNeighbours++;
-        }
-        if(gameBoard[x][y+1].isAlive()) {
-          amountOfLiveNeighbours++;
-        }
-        if(gameBoard[x][y-1].isAlive()) {
-          amountOfLiveNeighbours++;
-        }
-        return amountOfLiveNeighbours;
+    }
+    return amountOfLiveNeighbours;
+}
+
+function updateCellsAmountOfLiveNeighbours(universe) {
+	var xSize = universe.xSize();
+	var ySize = universe.ySize();
+
+	for (var x = 0; x < xSize; x++) {
+      	for (var y = 0; y < ySize; y++) {
+	   		var amountOfLiveNeighbours = returnAmountOfLiveNeighbours(universe, x, y);
+	   		universe.returnCell(x,y).setAmountOfLiveNeighbours(amountOfLiveNeighbours);     
+	   	}
+	}
 }
 
 var Universe = function (xSizeIn,ySizeIn) {
 	
-	var gameBoard = new Array(xSizeIn);
 	var xSize = xSizeIn;
 	var ySize = ySizeIn;
+
+	var gameBoard = new Array(xSize);
 	
 	for (var x = 0; x < xSize; x++){
 		gameBoard[x] = new Array(ySize);
 
 		for (var y = 0; y < ySize; y++){
 			gameBoard[x][y] = new Cell();
-			if (x === 0 || y === 0 || x === xSize-1 || 
-				y === ySize-1) {
-				gameBoard[x][y].setAtEdgeOfBoard();			
-			}
 		}
 	}
 
@@ -87,29 +128,50 @@ var Universe = function (xSizeIn,ySizeIn) {
 	};
 
 	this.update = function () {
-		//console.log('X 1 2 3 4 5 6 7 8 9 10 11 12 13');
-	    for (var x = 1; x < xSize-1; x++) {
-	    	var out = x+ ' ';
-	      for (var y = 1; y < ySize-1; y++) {
+	    updateCellsAmountOfLiveNeighbours(this);
 
-	        var amountOfLiveNeighbours = 
-	        	returnAmountOfLiveNeighbours(gameBoard, x, y);
+		for (var x2 = 0; x2 < xSize; x2++) {
+	    	for (var y2 = 0; y2 < ySize; y2++) {
+	    		var cell = this.returnCell(x2,y2);
+	    		var amountOfLiveNeighbours = cell.getAmountOfLiveNeighbours();
 
-	        if (gameBoard[x][y].isAlive()) {
-	        	out = out + 'A ';
-	        	
-	        } else {
-	        	out = out + amountOfLiveNeighbours + ' ';
-	        }
-	        /*
-	        if (amountOfLiveNeighbours < 2) {
-	        	gameBoard[x][y].kill();
-	        }
-	        */
-	      }
+	    		if (amountOfLiveNeighbours < 2) {
+	    			cell.kill();
+	    		}
 
-        //console.log(out);
+	    		if (amountOfLiveNeighbours > 3) {
+	    			cell.kill();
+	    		}
 
+	    		if (amountOfLiveNeighbours === 3) {
+	    			cell.spawn();
+	    		}
+	    	}
+		}
+	};
+
+	this.printToConsole = function () {
+		var xSize = this.xSize();
+		var ySize = this.ySize();
+		console.log('------------------------------------');
+		console.log('0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 X');
+		console.log('------------------------------------');
+		for (var x = 0; x < xSize; x++) {
+			var out = '';   	
+			for (var y = 0; y < ySize; y++) {
+
+				var amountOfLiveNeighbours = returnAmountOfLiveNeighbours(this, x, y);
+			     		
+			    if (this.returnCell(x,y).isAlive()) {
+			       	out = out + 'A ';
+			      	
+			    } else {
+			       	out = out + amountOfLiveNeighbours + ' ';
+			       	//out = out + '  ';
+			    }   
+			}
+			out = out + ':' + x;
+	        console.log(out);
 	    }
 	};
 };
@@ -129,7 +191,14 @@ angular.module('gameoflifeApp')
     $scope.universe = new Universe(15,15);
     $scope.universe.returnCell(4,4).spawn();
     $scope.universe.returnCell(4,5).spawn();
-    
 
+    $scope.universe.returnCell(10,9).spawn();
+    $scope.universe.returnCell(10,10).spawn();
+    $scope.universe.returnCell(10,11).spawn();
+    $scope.universe.returnCell(11,10).spawn();
+    $scope.universe.returnCell(11,11).spawn();
+    
+    $scope.universe.printToConsole();
     $scope.universe.update();
+    $scope.universe.printToConsole();
   });

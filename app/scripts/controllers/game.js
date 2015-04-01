@@ -128,10 +128,12 @@ var Universe = function (xSizeIn,ySizeIn) {
 	};
 
 	this.update = function () {
+
 	    updateCellsAmountOfLiveNeighbours(this);
 
 		for (var x2 = 0; x2 < xSize; x2++) {
-	    	for (var y2 = 0; y2 < ySize; y2++) {
+	    	for (var y2 = 0; y2 < ySize; y2++) {	
+	    		
 	    		var cell = this.returnCell(x2,y2);
 	    		var amountOfLiveNeighbours = cell.getAmountOfLiveNeighbours();
 

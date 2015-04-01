@@ -100,6 +100,51 @@ function updateCellsAmountOfLiveNeighbours(universe) {
 	}
 }
 
+// Cell alive
+var cellAliveReady = false;
+var cellAliveImage = new Image();
+cellAliveImage.onload = function () {
+	cellAliveReady = true;
+};
+cellAliveImage.src = 'images/monster-sad.png';
+
+// Cell alive
+var cellDeadReady = false;
+var cellDeadImage = new Image();
+cellAliveImage.onload = function () {
+	cellDeadReady = true;
+};
+cellDeadImage.src = 'images/monster-mad.png';
+
+// The main game loop
+function mainGameLoop(universe) {
+	var xSize = universe.xSize();
+	var ySize = universe.ySize();
+
+	// Create the canvas
+	var canvas = document.getElementById('gameBoard');
+	var ctx = canvas.getContext('2d');
+	canvas.width = xSize*30;
+	canvas.height = ySize*30;
+
+	
+		for (var x = 0; x < xSize; x++) {
+			for (var y = 0; y < ySize; y++) {
+		
+			    if (universe.returnCell(x,y).isAlive()) {
+					ctx.drawImage(cellAliveImage, x*30, y*30);      	
+			    } else {
+					ctx.drawImage(cellDeadImage, x*30, y*30);
+			    }   
+			}
+	    }
+	    
+	setTimeout(function(){
+    	universe.update();
+    	mainGameLoop(universe);
+	}, 2000);
+}
+
 var Universe = function (xSizeIn,ySizeIn) {
 	
 	var xSize = xSizeIn;
@@ -174,6 +219,10 @@ var Universe = function (xSizeIn,ySizeIn) {
 	        console.log(out);
 	    }
 	};
+
+	this.start = function () {
+		mainGameLoop(this);
+	};
 };
 
 /**
@@ -192,13 +241,21 @@ angular.module('gameoflifeApp')
     $scope.universe.returnCell(4,4).spawn();
     $scope.universe.returnCell(4,5).spawn();
 
+    $scope.universe.returnCell(7,3).spawn();
+    $scope.universe.returnCell(7,4).spawn();
+    $scope.universe.returnCell(7,5).spawn();
+    $scope.universe.returnCell(7,6).spawn();
+    $scope.universe.returnCell(7,7).spawn();
+
     $scope.universe.returnCell(10,9).spawn();
     $scope.universe.returnCell(10,10).spawn();
     $scope.universe.returnCell(10,11).spawn();
     $scope.universe.returnCell(11,10).spawn();
     $scope.universe.returnCell(11,11).spawn();
+
+    $scope.universe.returnCell(14,14).spawn();
+    $scope.universe.returnCell(13,14).spawn();
+    $scope.universe.returnCell(14,13).spawn();
     
-    $scope.universe.printToConsole();
-    $scope.universe.update();
-    $scope.universe.printToConsole();
+    $scope.universe.start();
   });
